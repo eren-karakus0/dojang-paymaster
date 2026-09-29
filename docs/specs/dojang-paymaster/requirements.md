@@ -26,7 +26,7 @@ Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphan
 - FR-11: Paymaster, attestation'ın expiry değerini `validationData` içindeki `validUntil` alanına yazar.
 - FR-12: Paymaster tek bir UserOp'un `maxCost` değeri yapılandırılmış üst sınırı aşarsa reddeder.
 - FR-13: Paymaster bir `sender` için mevcut dönemde harcanan gas maliyeti ile yeni `maxCost`'un toplamı hesap başı limiti aşarsa reddeder.
-- FR-14: Paymaster `postOp` içinde gerçek gas maliyetini `sender`'ın mevcut dönem harcamasına ekler.
+- FR-14: Paymaster `postOp` içinde EntryPoint'in bildirdiği gas maliyetine kendi `postOp` payını (`POST_OP_OVERHEAD_GAS × fee`) ekleyip `sender`'ın dönem harcamasına yazar. Kayıt deposit'ten düşen tutarın altında kalmaz. EntryPoint `actualGasCost`'u postOp'tan önce hesapladığı için bu pay olmadan kayıt ~%13 eksik kalıyordu (T4 testi).
 - FR-15: Owner, kabul edilen attester ID listesini (en fazla 8) değiştirebilir.
 - FR-16: Owner, UserOp başı ve hesap başı limitleri değiştirebilir.
 - FR-17: Owner dönem sayacını artırarak tüm hesap harcamalarını sıfırlayabilir.
