@@ -75,7 +75,7 @@ Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphan
 
 | ID | Varsayım | Dayanak | Yanlışsa etkisi |
 |---|---|---|---|
-| A1 | Bundler'ın minimum paymaster stake'i ≤ 0,001 ETH | EntryPoint'te 6 `StakeLocked` kaydından 5'i 0,001 ETH (2026-09-29 okuması). Çıkarım, bundler config'i görülmedi | Stake artar; cüzdan bakiyesi 0,0332 ETH olduğundan 0,01+ ETH gerekirse bütçe NFR-5'i aşar |
+| A1 | **Çürütüldü 2026-09-29.** Bundler STO-033 okuması yapan paymaster için **1 ETH** stake ve 86400 sn unstake gecikmesi istiyor (hata: entity stake/unstake delay too low, minimumStake 0xde0b6b3a7640000) | E2E pozitif akışı çalıştırıldı | 1 ETH GIWA Sepolia ETH gerekiyor ya da stake gerektirmeyen tasarım; kullanıcı kararı bekleniyor |
 | A2 | **Doğrulandı 2026-09-29.** GIWA type-4 işlemlerini ve bundler 7702 hesaplarını destekliyor | Yardımcı cüzdan delegasyonu + self-paid UserOp başarılı (tx 0x8e507629…0096) | E2E için 7702 yerine sayaç-factory tabanlı smart account gerekir; ama o hesabın Dojang attestation'ı olmaz, bu da demo akışını değiştirir |
 | A3 | Dojang view fonksiyonlarında yasaklı opcode yok | #37 yazarının üretim beyanı; kaynak kod incelemesi | FR-19 bunu yakalar; tasarım değişir |
 | A4 | STO-033 okumaları stake'li paymaster için izinli | ERC-7562 metni; #37 | Validation reddedilir |

@@ -1,15 +1,13 @@
 // Risk spike T2: can GIWA Sepolia and its bundler run EIP-7702 accounts on EntryPoint v0.9?
 // Idempotent: each step checks chain state first and is skipped when already done.
-import { concat, createWalletClient, formatEther, http, parseEther, type Address, type Hex } from 'viem';
+import { formatEther, http, parseEther } from 'viem';
 import { createBundlerClient, toSimple7702SmartAccount } from 'viem/account-abstraction';
-import { giwaSepolia } from 'viem/chains';
-import { chainContext, sendGuarded, waitForState } from './lib/chain.ts';
+import { ensureDelegated, ensureSimple7702Account } from './lib/canonical.ts';
+import { chainContext, sendGuarded } from './lib/chain.ts';
 import { findWallet, loadLocalConfig } from './lib/config.ts';
-import { ensureSimple7702Account } from './lib/canonical.ts';
 import { SIMPLE_7702_ACCOUNT } from './lib/constants.ts';
 import { withWalletAccount } from './lib/wallet-key.ts';
 
-const IMPLEMENTATION = SIMPLE_7702_ACCOUNT['0.9'];
 const HELPER_FUNDING = parseEther('0.003');
 const HELPER_MIN_BALANCE = parseEther('0.002');
 
@@ -17,8 +15,6 @@ const config = loadLocalConfig();
 const ctx = chainContext(config);
 const primary = findWallet(config, 'primary');
 const helper = findWallet(config, 'helper-1');
-
-const delegationCode = (implementation: Address): Hex => concat(['0xef0100', implementation]).toLowerCase() as Hex;
 
 // 1. Canonical Simple7702Account for EntryPoint v0.9 (same init code and salt as on Ethereum Sepolia).
 await withWalletAccount(primary, (account) => ensureSimple7702Account(ctx, account, '0.9'));
@@ -31,13 +27,7 @@ if (await ctx.client.getBalance({ address: helper.address }) < HELPER_MIN_BALANC
 
 await withWalletAccount(helper, async (owner) => {
   // 3. Delegate (or re-delegate) the helper EOA with a plain type-4 transaction.
-  if ((await ctx.client.getCode({ address: helper.address }))?.toLowerCase() !== delegationCode(IMPLEMENTATION)) {
-    const wallet = createWalletClient({ account: owner, chain: giwaSepolia, transport: http(config.rpcUrl) });
-    const authorization = await wallet.signAuthorization({ contractAddress: IMPLEMENTATION, executor: 'self' });
-    await sendGuarded(ctx, owner, { label: 'helper-1 7702 delegation', to: helper.address, authorizationList: [authorization] });
-  }
-  await waitForState('helper-1 delegation', () => ctx.client.getCode({ address: helper.address }),
-    (code) => code?.toLowerCase() === delegationCode(IMPLEMENTATION));
+  await ensureDelegated(ctx, owner, SIMPLE_7702_ACCOUNT['0.9']);
   console.log('helper-1 delegated to Simple7702Account v0.9');
 
   // 4. Self-funded UserOp through the official bundler proves bundler-side 7702 support.
