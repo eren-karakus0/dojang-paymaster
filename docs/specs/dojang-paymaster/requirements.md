@@ -4,7 +4,7 @@ Tarih: 2026-09-29 · Durum: taslak, onay bekliyor
 
 ## Problem
 
-GIWA'da EntryPoint v0.8 (`0x433709009B8330FDa32311DF1C2AFA402eD8D009`), resmi bundler (`https://sepolia-bundler.giwa.io`, Rundler) ve Dojang birlikte bulunuyor. Ancak `DojangScroll.isVerified()` expiry kontrolü için `block.timestamp` okuyor. ERC-7562 bu opcode'u ERC-4337 validation içinde yasaklıyor. Sonuç olarak "yalnız Dojang doğrulamalı kullanıcıların gas'ını ödeyen" bir paymaster, bariz yoldan kurulduğunda bundler'a gönderimde reddediliyor. Kaynak: [giwa-io/dojang#37](https://github.com/giwa-io/dojang/issues/37), kontrol tarihi 2026-09-29. Issue açık. Önerilen raw getter PR'ı (#38) review almadı. Çözüm yolu tarif edilmiş ve issue sahibinin kapalı bir üründe çalıştığı belirtilmiş, fakat açık kaynak, test edilmiş, yeniden kullanılabilir bir referans bulunamadı.
+GIWA'da EntryPoint v0.9 (`0x433709009B8330FDa32311DF1C2AFA402eD8D009`; #37 bunu yanlışlıkla v0.8 diye etiketliyor, viem sabitleri ve eth-infinitism v0.9 sürüm notuyla doğrulandı), resmi bundler (`https://sepolia-bundler.giwa.io`, Rundler) ve Dojang birlikte bulunuyor. Ancak `DojangScroll.isVerified()` expiry kontrolü için `block.timestamp` okuyor. ERC-7562 bu opcode'u ERC-4337 validation içinde yasaklıyor. Sonuç olarak "yalnız Dojang doğrulamalı kullanıcıların gas'ını ödeyen" bir paymaster, bariz yoldan kurulduğunda bundler'a gönderimde reddediliyor. Kaynak: [giwa-io/dojang#37](https://github.com/giwa-io/dojang/issues/37), kontrol tarihi 2026-09-29. Issue açık. Önerilen raw getter PR'ı (#38) review almadı. Çözüm yolu tarif edilmiş ve issue sahibinin kapalı bir üründe çalıştığı belirtilmiş, fakat açık kaynak, test edilmiş, yeniden kullanılabilir bir referans bulunamadı.
 
 Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphanesi, onu kullanan bir paymaster ve GIWA Sepolia üzerinde kanıtlanmış uçtan uca akış.
 
@@ -17,10 +17,10 @@ Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphan
 - FR-4: Kütüphane iptal edilmiş attestation'ı (`revocationTime != 0`) "doğrulanmamış" olarak döndürür.
 - FR-5: Kütüphane alıcısı, şeması veya attester'ı beklenenle eşleşmeyen attestation'ı "doğrulanmamış" olarak döndürür.
 - FR-6: Kütüphane verisi tam olarak ABI kodlanmış `true` olmayan attestation'ı "doğrulanmamış" olarak döndürür. Bu DojangScroll'dan bilinçli olarak daha katıdır.
-- FR-7: Kütüphane geçerli attestation için `expirationTime` değerini `uint48 validUntil` olarak döndürür. 0 değeri süresiz demektir; `uint48` üst sınırını aşan değer üst sınıra kırpılır.
+- FR-7: Kütüphane geçerli attestation için `expirationTime` değerini `uint48 validUntil` olarak döndürür. 0 değeri süresiz demektir; 2^47−1'i aşan değer 2^47−1'e kırpılır. EntryPoint v0.9'da en üst bit (47) validity aralığını blok numarası kipine çevirir; zaman damgası bu biti asla set etmemeli.
 - FR-8: Kütüphane birden fazla attester ID verildiğinde ilk geçerli attestation'ı kabul eder.
 
-**Paymaster (EntryPoint v0.8)**
+**Paymaster (EntryPoint v0.9)**
 - FR-9: Paymaster, `sender` adresi kabul edilen attester ID'lerinden biri için doğrulanmışsa UserOp'u sponsorlar.
 - FR-10: Paymaster doğrulanmamış `sender` için validation'da reddeder.
 - FR-11: Paymaster, attestation'ın expiry değerini `validationData` içindeki `validUntil` alanına yazar.
@@ -35,7 +35,7 @@ Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphan
 **Araçlar ve kanıt**
 - FR-19: Opcode denetim script'i, verilen bir UserOp için paymaster validation çağrısını `debug_traceCall` ile izler ve ERC-7562 yasaklı opcode'larını listeler.
 - FR-20: Deploy script'i paymaster'ı GIWA Sepolia'ya deploy eder, stake ve deposit yatırır, attester ID'lerini ayarlar.
-- FR-21: Deploy script'i GIWA'da yoksa `Simple7702Account` (eth-infinitism v0.8) implementasyonunu deterministik adrese deploy eder.
+- FR-21: Deploy script'i GIWA'da yoksa `Simple7702Account` (eth-infinitism v0.9) implementasyonunu kanonik deterministik adrese deploy eder.
 - FR-22: E2E script'i doğrulanmış bir EOA'dan EIP-7702 delegasyonuyla sponsorlu bir UserOp gönderir ve receipt'i doğrular.
 - FR-23: E2E script'i doğrulanmamış bir EOA'nın UserOp'unun bundler tarafından reddedildiğini doğrular.
 - FR-24: Script'ler imza anahtarını yalnız işlem anında bellekte açar. Anahtar argv'ye, ortam değişkenine, dosyaya veya çıktıya yazılmaz.
@@ -76,14 +76,14 @@ Bu kit o referansı sağlar: 4337'de kullanılabilir bir Dojang okuma kütüphan
 | ID | Varsayım | Dayanak | Yanlışsa etkisi |
 |---|---|---|---|
 | A1 | Bundler'ın minimum paymaster stake'i ≤ 0,001 ETH | EntryPoint'te 6 `StakeLocked` kaydından 5'i 0,001 ETH (2026-09-29 okuması). Çıkarım, bundler config'i görülmedi | Stake artar; cüzdan bakiyesi 0,0332 ETH olduğundan 0,01+ ETH gerekirse bütçe NFR-5'i aşar |
-| A2 | GIWA EIP-7702 (type-4) işlemlerini ve Rundler `eip7702Auth`'u destekliyor | OP Stack Isthmus Prague içerir; GIWA için doğrulanmadı | E2E için 7702 yerine sayaç-factory tabanlı smart account gerekir; ama o hesabın Dojang attestation'ı olmaz, bu da demo akışını değiştirir |
+| A2 | **Doğrulandı 2026-09-29.** GIWA type-4 işlemlerini ve bundler 7702 hesaplarını destekliyor | Yardımcı cüzdan delegasyonu + self-paid UserOp başarılı (tx 0x8e507629…0096) | E2E için 7702 yerine sayaç-factory tabanlı smart account gerekir; ama o hesabın Dojang attestation'ı olmaz, bu da demo akışını değiştirir |
 | A3 | Dojang view fonksiyonlarında yasaklı opcode yok | #37 yazarının üretim beyanı; kaynak kod incelemesi | FR-19 bunu yakalar; tasarım değişir |
 | A4 | STO-033 okumaları stake'li paymaster için izinli | ERC-7562 metni; #37 | Validation reddedilir |
 | A5 | Ana cüzdanın attestation'ı 2026-10-22 21:23 UTC'ye kadar geçerli (`0xaa92…` ID) | Zincir okuması 2026-09-29 | E2E bu tarihten önce yapılmalı ya da yenilenmeli |
-| A6 | eth-infinitism v0.8 `Simple7702Account` deterministik deploy ile kanonik adrese kurulabilir | Nick's factory GIWA'da mevcut (okundu) | Farklı adrese deploy; işlev etkilenmez |
+| A6 | **Doğrulandı 2026-09-29.** v0.8 ve v0.9 `Simple7702Account` kanonik adreslere kuruldu | Ethereum Sepolia deploy girdisi yeniden oynatıldı | Farklı adrese deploy; işlev etkilenmez |
 | A7 | `debug_traceCall` struct logger GIWA RPC'de açık kalır | 2026-09-29 çağrısı başarılı | Opcode denetimi yalnız canlı gönderimle yapılır |
 
-Harici bağımlılıklar (sürümler implementasyonda kayıt defterinden doğrulanıp sabitlenecek): eth-infinitism `account-abstraction` v0.8, `eas-contracts`, OpenZeppelin Contracts, viem (TS script'ler).
+Harici bağımlılıklar: eth-infinitism `account-abstraction` v0.9.0 (b36a1ed5), `eas-contracts`, OpenZeppelin Contracts, viem (TS script'ler).
 
 ## Doğrulama kontrol listesi
 

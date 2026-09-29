@@ -4,8 +4,8 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Hex, LocalAccount } from 'viem';
-import { generatePrivateKey, privateKeyToAccount, privateKeyToAddress } from 'viem/accounts';
+import type { Hex } from 'viem';
+import { generatePrivateKey, privateKeyToAccount, privateKeyToAddress, type PrivateKeyAccount } from 'viem/accounts';
 import type { WalletEntry } from './config.ts';
 
 const HEX_KEY = /^(?:0x)?[a-fA-F0-9]{64}$/;
@@ -44,7 +44,7 @@ function toHexKey(bytes: Buffer, walletId: string): Hex {
  * Throws WalletKeyError when the file cannot be decrypted or belongs to a different address.
  * The viem account keeps its own key copy until garbage collection; do not retain it after `use` returns.
  */
-export async function withWalletAccount<T>(wallet: WalletEntry, use: (account: LocalAccount) => Promise<T>): Promise<T> {
+export async function withWalletAccount<T>(wallet: WalletEntry, use: (account: PrivateKeyAccount) => Promise<T>): Promise<T> {
   let bytes: Buffer | undefined;
   try {
     try { bytes = decrypt(wallet.keyFile); } catch { throw new WalletKeyError(wallet.id, 'DPAPI decryption failed'); }
