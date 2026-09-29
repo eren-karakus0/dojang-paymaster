@@ -1,0 +1,16 @@
+{
+  "name": "dojang-paymaster-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deployment, audit and end-to-end scripts for the Dojang-gated ERC-4337 paymaster on GIWA Sepolia",
+  "engines": { "node": ">=22.18.0 <23" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test:scripts": "node --test scripts/test/*.test.ts",
+    "check:secrets": "node scripts/check-secrets.ts",
+    "check": "npm run typecheck && npm run test:scripts && npm run check:secrets"
+  },
+  "dependencies": { "viem": "2.56.9" },
+  "devDependencies": { "@types/node": "22.20.4", "typescript": "7.0.2" }
+}

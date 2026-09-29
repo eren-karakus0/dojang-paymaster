@@ -1,0 +1,8 @@
+{
+  "rpcUrl": "https://sepolia-rpc.giwa.io",
+  "bundlerUrl": "https://sepolia-bundler.giwa.io",
+  "spendCapWei": "12000000000000000",
+  "wallets": [
+    { "id": "primary", "address": "0x0000000000000000000000000000000000000000", "keyFile": "C:/path/outside/repo/primary.dpapi" }
+  ]
+}
