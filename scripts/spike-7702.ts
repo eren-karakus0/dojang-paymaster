@@ -1,12 +1,12 @@
 // Risk spike T2: can GIWA Sepolia and its bundler run EIP-7702 accounts on EntryPoint v0.9?
 // Idempotent: each step checks chain state first and is skipped when already done.
-import { readFileSync } from 'node:fs';
 import { concat, createWalletClient, formatEther, http, parseEther, type Address, type Hex } from 'viem';
 import { createBundlerClient, toSimple7702SmartAccount } from 'viem/account-abstraction';
 import { giwaSepolia } from 'viem/chains';
 import { chainContext, sendGuarded, waitForState } from './lib/chain.ts';
 import { findWallet, loadLocalConfig } from './lib/config.ts';
-import { DETERMINISTIC_DEPLOYER, SIMPLE_7702_ACCOUNT } from './lib/constants.ts';
+import { ensureSimple7702Account } from './lib/canonical.ts';
+import { SIMPLE_7702_ACCOUNT } from './lib/constants.ts';
 import { withWalletAccount } from './lib/wallet-key.ts';
 
 const IMPLEMENTATION = SIMPLE_7702_ACCOUNT['0.9'];
@@ -21,11 +21,7 @@ const helper = findWallet(config, 'helper-1');
 const delegationCode = (implementation: Address): Hex => concat(['0xef0100', implementation]).toLowerCase() as Hex;
 
 // 1. Canonical Simple7702Account for EntryPoint v0.9 (same init code and salt as on Ethereum Sepolia).
-if (!(await ctx.client.getCode({ address: IMPLEMENTATION }))) {
-  const input = readFileSync('deployments/canonical/simple7702account-v0.9.calldata', 'utf8').trim() as Hex;
-  await withWalletAccount(primary, (account) => sendGuarded(ctx, account, { label: 'deploy Simple7702Account v0.9', to: DETERMINISTIC_DEPLOYER, data: input }));
-  await waitForState('Simple7702Account v0.9 code', () => ctx.client.getCode({ address: IMPLEMENTATION }), (code) => !!code);
-}
+await withWalletAccount(primary, (account) => ensureSimple7702Account(ctx, account, '0.9'));
 console.log('Simple7702Account v0.9 present at canonical address');
 
 // 2. Fund the helper wallet only up to what the spike needs.

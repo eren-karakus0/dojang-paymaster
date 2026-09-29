@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-09-29T16:19:28.026Z",
+  "block": "37353651",
+  "paymaster": "0xD89E68Af3084D8DFb38304cDD1B253E13Ed866Ad",
+  "paymasterValidation": {
+    "reverted": false,
+    "steps": 4735,
+    "gas": 135896,
+    "bannedOpcodes": []
+  },
+  "controlDojangScrollIsVerified": {
+    "steps": 2176,
+    "bannedOpcodes": [
+      "TIMESTAMP"
+    ]
+  }
+}

@@ -33,7 +33,8 @@ export class SpendGuard {
 
 export interface GuardedRequest {
   label: string;
-  to: Address;
+  /** Omit to create a contract from `data` (init code). */
+  to?: Address;
   data?: Hex;
   value?: bigint;
   authorizationList?: SignedAuthorizationList;
@@ -54,7 +55,7 @@ export async function sendGuarded(
   { client, rpcUrl, guard }: ChainContext, account: LocalAccount, request: GuardedRequest,
 ): Promise<TransactionReceipt> {
   if (await client.getChainId() !== giwaSepolia.id) throw new Error('RPC is not GIWA Sepolia');
-  const base = { account, to: request.to, data: request.data ?? '0x', value: request.value ?? 0n,
+  const base = { account, ...(request.to ? { to: request.to } : {}), data: request.data ?? '0x', value: request.value ?? 0n,
     ...(request.authorizationList ? { authorizationList: request.authorizationList } : {}) } as const;
   await client.call(base);
   const gas = (await client.estimateGas(base)) * (100n + GAS_HEADROOM_PERCENT) / 100n;
