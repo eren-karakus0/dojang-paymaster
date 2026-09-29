@@ -16,7 +16,11 @@ contract DojangAddressVerifierTest is DojangFixture {
         expiry = uint64(block.timestamp + 30 days);
     }
 
-    function _check(address account, bytes32[] memory ids) internal view returns (DojangAddressVerifier.Verdict memory) {
+    function _check(address account, bytes32[] memory ids)
+        internal
+        view
+        returns (DojangAddressVerifier.Verdict memory)
+    {
         return DojangAddressVerifier.check(IDojangScroll(address(scroll)), account, ids);
     }
 
@@ -55,7 +59,10 @@ contract DojangAddressVerifierTest is DojangFixture {
         _issue(_record(attesterA, user, expirationTime));
         uint48 validUntil = _check(user, _ids(ID_A)).validUntil;
         assertEq(validUntil & (uint48(1) << 47), 0);
-        assertEq(validUntil, expirationTime > DojangAddressVerifier.MAX_TIMESTAMP ? DojangAddressVerifier.MAX_TIMESTAMP : expirationTime);
+        assertEq(
+            validUntil,
+            expirationTime > DojangAddressVerifier.MAX_TIMESTAMP ? DojangAddressVerifier.MAX_TIMESTAMP : expirationTime
+        );
     }
 
     // FR-3

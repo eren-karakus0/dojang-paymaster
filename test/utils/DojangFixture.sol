@@ -34,7 +34,10 @@ abstract contract DojangFixture is Test {
         attesterBook.set(ID_B, attesterB);
     }
 
-    function _record(address attester, address recipient, uint64 expirationTime) internal returns (Attestation memory a) {
+    function _record(address attester, address recipient, uint64 expirationTime)
+        internal
+        returns (Attestation memory a)
+    {
         a.uid = keccak256(abi.encode("uid", ++_nonce));
         a.schema = SCHEMA_UID;
         a.time = uint64(block.timestamp);
