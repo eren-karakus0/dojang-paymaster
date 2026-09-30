@@ -8,7 +8,7 @@ Tarih: 2026-09-29 · Durum: taslak, onay bekliyor · Gereksinimler: [requirement
  Kullanıcı EOA (7702 → Simple7702Account)
         │ UserOp (+ eip7702Auth ilk seferde)
         ▼
- GIWA bundler (Rundler) ──simulate/validate──► EntryPoint v0.8 (0x4337…D009)
+ GIWA bundler (Rundler) ──simulate/validate──► EntryPoint v0.9 (0x4337…D009)
                                                   │ validatePaymasterUserOp / postOp
                                                   ▼
                                    DojangVerifiedPaymaster  (BU KİT)
@@ -54,13 +54,13 @@ Akış (FR-1…FR-8), her attester ID için:
 2. `attester = scroll._dojangAttesterBook().getAttester(id)`. Sonuç 0 ise sonraki ID'ye geçilir. Güncel attester okunduğu için rotate edilen ID'lerde DojangScroll ile aynı davranır.
 3. `uid = scroll._indexer().getAttestationUid(schemaUid, attester, account)`. Sonuç 0 ise sonraki ID.
 4. `a = EAS.getAttestation(uid)`. Şunlar kontrol edilir: `a.uid == uid`, `a.revocationTime == 0`, `a.recipient == account`, `a.schema == schemaUid`, `a.attester == attester`, `a.data.length == 32 && uint256(bytes32(a.data)) == 1`.
-5. İlk geçerli ID döner. `validUntil = a.expirationTime == 0 ? 0 : min(a.expirationTime, type(uint48).max)`.
+5. İlk geçerli ID döner. `validUntil = a.expirationTime == 0 ? 0 : min(a.expirationTime, 2**47 - 1)`. v0.9 en üst biti blok numarası kipi için ayırıyor.
 
 Revert etmez; doğrulanamayan her durum `verified=false` döner. Bunun iki nedeni var: validation'da açıklayıcı reddi paymaster yapar, ve kütüphane başka bağlamlarda da (örneğin bir hesabın `validateUserOp`'unda) kullanılabilir. `ADDRESS_DOJANG_ID` Dojang `Types.sol`'daki şema kimliğidir; implementasyonda kaynaktan birebir alınıp testle sabitlenecek.
 
 **Bilinçli fark:** DojangScroll'un expiry'yi validation anında değerlendirmesi yerine süre EntryPoint'e bırakılır (FR-7). Veri alanındaki bool kontrol edilir (FR-6).
 
-### `DojangVerifiedPaymaster` (EntryPoint v0.8 `BasePaymaster` türevi)
+### `DojangVerifiedPaymaster` (EntryPoint v0.9 `BasePaymaster` türevi)
 **Sorumluluk:** doğrulanmış gönderenlerin UserOp'larını bütçe sınırları içinde sponsorlar.
 
 Durum (storage):
@@ -99,7 +99,7 @@ Zincir dışında kalıcı veri yok; `deployments/91342.json` dışında durum t
 | Validation dış çağrıları | Dojang kontratı revert eder | Validation revert eder, op sponsorlanmaz, bundler reddeder. Kullanıcı hata kodunu görür |
 | Attester silinmiş (0 adres) | — | O ID atlanır; hiçbiri geçerli değilse `SenderNotVerified` |
 | Attestation süresi validation'dan sonra dolmuş | — | EntryPoint `validUntil` ile reddeder; paymaster'a ücret yansımaz |
-| `postOp` | Reverti engellenecek kadar basit (tek toplama) | v0.8'de postOp revert'ü op'u geri alır; bu yüzden postOp yalnız aritmetik yapar |
+| `postOp` | Reverti engellenecek kadar basit (tek toplama) | v0.7+ postOp revert'ü op'u geri alır; bu yüzden postOp yalnız aritmetik yapar |
 | Script: RPC/bundler hatası | Zaman aşımı 30 s | Yeniden gönderim yok. Tx hash kaydedilir, sonraki çalıştırmada durum okunarak devam edilir |
 | Script: simülasyon başarısız | — | İmza atılmaz, script hatayla çıkar |
 | Script: bütçe tavanı aşılır | Tahmini maliyet > yapılandırılmış tavan | İmza atılmaz |

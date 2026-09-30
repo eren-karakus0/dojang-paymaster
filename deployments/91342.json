@@ -1,0 +1,36 @@
+{
+  "chainId": 91342,
+  "entryPoint": "0x433709009B8330FDa32311DF1C2AFA402eD8D009",
+  "simple7702Account": "0xa46cc63eBF4Bd77888AA327837d20b23A63a56B5",
+  "dojangScroll": "0xd5077b67dcb56caC8b270C7788FC3E6ee03F17B9",
+  "paymaster": {
+    "address": "0xD89E68Af3084D8DFb38304cDD1B253E13Ed866Ad",
+    "owner": "0xc89126D2cCdc8e5C59A0026bfFCB3aa901D16fFE",
+    "deployment": {
+      "hash": "0xadeb40d678f93f1d5d874613dee2c05a4684296e59a4560ac245352851b2917a",
+      "block": "37353602"
+    },
+    "attesterIds": [
+      "0x38d8cb51c229b3d73d4726e3c12bc280371c6eecea81939e3685e1f5b54c702b",
+      "0x8c5b37d692bb30f1bf88ddb3478c84d86c7fb5778b789e8f4b79493cf9a7902e",
+      "0xaa92f8c143657dde575de430aecaea6ca91f2e6072339b16932d426895d8d678",
+      "0xd1d363b0d54eb2b25cea87dce463bdcf40dd33875a10849f4945ed2dabc14246"
+    ],
+    "maxCostPerOpWei": "100000000000000",
+    "maxCostPerAccountWei": "1000000000000000",
+    "gitCommit": "fdb0d53e007caa5480659869633175ffe9319efb"
+  },
+  "stake": {
+    "hash": "0x8e57aa59528663bc89ce2e513df4013bcf4c398664d9a12aa5f79963d2a606e2",
+    "block": "37353609",
+    "amountWei": "1000000000000000",
+    "unstakeDelaySec": 86400
+  },
+  "deposits": [
+    {
+      "hash": "0x122e443d1aae6d7f25a047100c5134c5a0f30e72b6c9d92b7cf0a7ef25a9a9b8",
+      "block": "37353616",
+      "amountWei": "5000000000000000"
+    }
+  ]
+}

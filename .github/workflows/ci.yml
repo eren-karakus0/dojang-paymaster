@@ -19,6 +19,7 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - run: forge fmt --check src test
       - run: forge build --sizes
       # Fork tests skip themselves unless DOJANG_FORK_ACCOUNT is set; CI never uses live keys.
       - run: forge test -vv
