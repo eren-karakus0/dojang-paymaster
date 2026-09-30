@@ -1,6 +1,6 @@
 # Gereksinimler — Dojang-gated ERC-4337 paymaster kiti
 
-Tarih: 2026-09-29 · Durum: taslak, onay bekliyor
+Tarih: 2026-09-29 · Durum: onaylandı; T1–T7 uygulandı, T8 (canlı E2E) 1 ETH stake gereksinimi nedeniyle tamamlanmadı, geliştirme 2026-09-30 itibarıyla durduruldu
 
 ## Problem
 
